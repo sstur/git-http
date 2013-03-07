@@ -1,13 +1,13 @@
 #!/bin/sh
 
 oneTimeSetUp() {
-	GIT_PROJECT_NAME="git-ftp-test"
+	GIT_PROJECT_NAME="git-http-test"
 
-	GIT_PROJECT_PATH="/tmp/git-ftp-test"
+	GIT_PROJECT_PATH="/tmp/git-http-test"
 	FTP_PROJECT_PATH="/opt/lampp/htdocs/$GIT_PROJECT_NAME"
 
 	BASE_PATH="$(pwd)/../"
-	GIT_FTP_CMD="${BASE_PATH}git-ftp"
+	GIT_FTP_CMD="${BASE_PATH}git-http"
 	GIT_FTP_USER="nobody"
 	GIT_FTP_PASSWD="lampp"
 	GIT_FTP_URL="localhost/$GIT_PROJECT_NAME"
@@ -52,12 +52,12 @@ tearDown() {
 
 test_displays_usage() {
 	usage=$($GIT_FTP_CMD 2>&1)
-	assertEquals "git-ftp <action> [<options>] <url>" "$usage"
+	assertEquals "git-http <action> [<options>] <url>" "$usage"
 }
 
 test_prints_version() {
 	version=$($GIT_FTP_CMD 2>&1 --version)
-	assertEquals = "git-ftp version 0.8.3-snapshot"  "$version"
+	assertEquals = "git-http version 0.8.3-snapshot"  "$version"
 }
 
 test_inits_and_pushes() {
@@ -94,9 +94,9 @@ test_pushes_and_fails() {
 
 test_defaults() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password $GIT_FTP_PASSWD
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password $GIT_FTP_PASSWD
+	git config git-http.url $GIT_FTP_URL
 
 	init=$($GIT_FTP_CMD init)
 	rtrn=$?
@@ -105,9 +105,9 @@ test_defaults() {
 
 test_defaults_uses_url_by_cli() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password $GIT_FTP_PASSWD
-	git config git-ftp.url notexisits
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password $GIT_FTP_PASSWD
+	git config git-http.url notexisits
 
 	init=$($GIT_FTP_CMD init $GIT_FTP_URL)
 	rtrn=$?
@@ -117,9 +117,9 @@ test_defaults_uses_url_by_cli() {
 
 test_defaults_uses_user_by_cli() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user johndoe
-	git config git-ftp.password $GIT_FTP_PASSWD
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user johndoe
+	git config git-http.password $GIT_FTP_PASSWD
+	git config git-http.url $GIT_FTP_URL
 
 	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER)
 	rtrn=$?
@@ -128,9 +128,9 @@ test_defaults_uses_user_by_cli() {
 
 test_defaults_uses_password_by_cli() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password wrongpasswd
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password wrongpasswd
+	git config git-http.url $GIT_FTP_URL
 
 	init=$($GIT_FTP_CMD init -p $GIT_FTP_PASSWD)
 	rtrn=$?
@@ -139,11 +139,11 @@ test_defaults_uses_password_by_cli() {
 
 test_scopes() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password wrongpasswd
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password wrongpasswd
+	git config git-http.url $GIT_FTP_URL
 
-	git config git-ftp.testing.password $GIT_FTP_PASSWD
+	git config git-http.testing.password $GIT_FTP_PASSWD
 
 	init=$($GIT_FTP_CMD init -s testing)
 	rtrn=$?
@@ -152,9 +152,9 @@ test_scopes() {
 
 test_scopes_using_branchname_as_scope() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.production.user $GIT_FTP_USER
-	git config git-ftp.production.password $GIT_FTP_PASSWD
-	git config git-ftp.production.url $GIT_FTP_URL
+	git config git-http.production.user $GIT_FTP_USER
+	git config git-http.production.password $GIT_FTP_PASSWD
+	git config git-http.production.url $GIT_FTP_URL
 	git checkout -b production > /dev/null 2>&1
 
 	init=$($GIT_FTP_CMD init -s)
@@ -165,11 +165,11 @@ test_scopes_using_branchname_as_scope() {
 
 test_overwrite_defaults_by_scopes_emtpy_string() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password $GIT_FTP_PASSWD
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password $GIT_FTP_PASSWD
+	git config git-http.url $GIT_FTP_URL
 
-	git config git-ftp.testing.password ''
+	git config git-http.testing.password ''
 
 	init=$($GIT_FTP_CMD init -s testing)
 	rtrn=$?
@@ -178,11 +178,11 @@ test_overwrite_defaults_by_scopes_emtpy_string() {
 
 test_scopes_uses_password_by_cli() {
 	cd $GIT_PROJECT_PATH
-	git config git-ftp.user $GIT_FTP_USER
-	git config git-ftp.password wrongpasswd
-	git config git-ftp.url $GIT_FTP_URL
+	git config git-http.user $GIT_FTP_USER
+	git config git-http.password wrongpasswd
+	git config git-http.url $GIT_FTP_URL
 
-	git config git-ftp.testing.password wrongpasswdtoo
+	git config git-http.testing.password wrongpasswdtoo
 
 	init=$($GIT_FTP_CMD init -s testing -p $GIT_FTP_PASSWD)
 	rtrn=$?
@@ -215,7 +215,7 @@ test_delete() {
 
 test_ignore_single_file() {
 	cd $GIT_PROJECT_PATH
-	echo "test 1\.txt" > .git-ftp-ignore
+	echo "test 1\.txt" > .git-http-ignore
 
 	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
 
@@ -224,7 +224,7 @@ test_ignore_single_file() {
 
 test_ignore_dir() {
 	cd $GIT_PROJECT_PATH
-	echo "dir 1/.*" > .git-ftp-ignore
+	echo "dir 1/.*" > .git-http-ignore
 
 	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
 
@@ -234,7 +234,7 @@ test_ignore_dir() {
 
 test_ignore_wildcard_files() {
 	cd $GIT_PROJECT_PATH
-	echo "test.*\.txt" > .git-ftp-ignore
+	echo "test.*\.txt" > .git-http-ignore
 
 	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
 

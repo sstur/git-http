@@ -5,15 +5,15 @@ DESTDIR?=/usr/local
 prefix?=${DESTDIR}
 
 # files that need mode 755
-EXEC_FILES=git-ftp
+EXEC_FILES=git-http
 
 # files that need mode 644
-MAN_FILE=man1/git-ftp.1
+MAN_FILE=man1/git-http.1
 
 all:
-	@echo "usage: make install     -> installs git-ftp only"
+	@echo "usage: make install     -> installs git-http only"
 	@echo "       make install-man -> installs man pages only"
-	@echo "       make install-all -> installs git-ftp and man pages"	
+	@echo "       make install-all -> installs git-http and man pages"
 	@echo "       make uninstall"
 	@echo "       make uninstall-man"
 	@echo "       make uninstall-all"

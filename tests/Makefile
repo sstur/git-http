@@ -2,4 +2,4 @@
 SHELL=/bin/sh
 
 all:
-	./git-ftp-test.sh
+	./git-http-test.sh

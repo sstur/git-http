@@ -1,8 +1,8 @@
 SHELL=/bin/sh
 
 # files that need mode 644
-MAN_FILE=man1/git-ftp.1
-HTML_FILE=html/git-ftp.html
+MAN_FILE=man1/git-http.1
+HTML_FILE=html/git-http.html
 
 all:
 	@echo "usage: make man"
@@ -10,11 +10,11 @@ all:
 man:
 	install -d -m 0755 man1
 	pandoc -s \
-		-w man git-ftp.1.md \
+		-w man git-http.1.md \
 		-o  $(MAN_FILE)
 html:
 	pandoc -s -S --toc \
-		-c git-ftp.css git-ftp.1.md \
+		-c git-http.css git-http.1.md \
 		-o $(HTML_FILE)
 clean:
 	rm -f $(MAN_FILE)

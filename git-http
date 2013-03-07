@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 #
-# Copyright 2010-2012 René Moser
-# http://github.com/resmo/git-ftp
-#
-# Git-ftp is free software: you can redistribute it and/or modify
+# Git-http is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Git-ftp is distributed in the hope that it will be useful,
+# Git-http is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Git-ftp.  If not, see <http://www.gnu.org/licenses/>.
+# along with Git-http.  If not, see <http://www.gnu.org/licenses/>.
 
 # ------------------------------------------------------------
 # Setup Environment
@@ -24,7 +21,7 @@
 readonly DEFAULT_PROTOCOL="ftp"
 readonly REMOTE_LCK_FILE="$(basename "$0").lck"
 readonly SYSTEM="$(uname)"
-readonly VERSION='0.8.3-snapshot'
+readonly VERSION='0.1.0-snapshot'
 
 # ------------------------------------------------------------
 # Defaults
@@ -80,11 +77,11 @@ usage_long()
 local pager=$(git config --get core.pager)
 ${GIT_PAGER:-${pager:-${PAGER:-less -FRSX}}} << EOF
 USAGE
-	git-ftp <action> [<options>] <url>
+	git-http <action> [<options>] <url>
 
 
 DESCRIPTION
-	git-ftp does FTP the Git way.
+	git-http does FTP the Git way.
 
 	It uses Git to determine which local files have changed since the last
 	deployment to the remote server and saves you time and bandwidth by
@@ -97,7 +94,7 @@ DESCRIPTION
 ACTIONS
 	. init
 		Does an initial upload of the latest version of all non-ignored
-		git-tracked files to the remote server and creates .git-ftp.log
+		git-tracked files to the remote server and creates .git-http.log
 		file containing the SHA1 of the latest commit.
 
 	. push
@@ -152,26 +149,26 @@ OPTIONS
 
 
 EXAMPLES
-	. git-ftp push -u john ftp://ftp.example.com:4445/public_ftp -p -v
-	. git-ftp push -p -u john -v ftp.example.com:4445:/public_ftp
-	. git-ftp add-scope production ftp://user:secr3t@ftp.example.com:4445/public_ftp
-	. git-ftp push --scope production
-	. git-ftp remove-scope production
+	. git-http push -u john ftp://ftp.example.com:4445/public_ftp -p -v
+	. git-http push -p -u john -v ftp.example.com:4445:/public_ftp
+	. git-http add-scope production ftp://user:secr3t@ftp.example.com:4445/public_ftp
+	. git-http push --scope production
+	. git-http remove-scope production
 
 
 SET DEFAULTS
-	. git config git-ftp.user john
-	. git config git-ftp.url ftp.example.com
-	. git config git-ftp.password secr3t
-	. git config git-ftp.syncroot path/dir
-	. git config git-ftp.cacert path/cacert
-	. git config git-ftp.deployedsha1file mySHA1File
-	. git config git-ftp.insecure 1
+	. git config git-http.user john
+	. git config git-http.url ftp.example.com
+	. git config git-http.password secr3t
+	. git config git-http.syncroot path/dir
+	. git config git-http.cacert path/cacert
+	. git config git-http.deployedsha1file mySHA1File
+	. git config git-http.insecure 1
 
 
 SET SCOPE DEFAULTS 
 	e.g. your scope is 'testing'
-	. git config git-ftp.testing.url ftp.example.local
+	. git config git-http.testing.url ftp.example.local
 
 
 VERSION
@@ -181,7 +178,7 @@ exit 0
 }
 
 usage() {
-	echo "git-ftp <action> [<options>] <url>"
+	echo "git-http <action> [<options>] <url>"
 	exit $ERROR_USAGE
 }
 
@@ -256,26 +253,26 @@ check_exit_status() {
 }
 
 get_config() {
-	# try .git-ftp-config
-	[ -n "$SCOPE" ] && [ -f '.git-ftp-config' ] && OUT="$(git config -f '.git-ftp-config' --get git-ftp.$SCOPE.$1)"
+	# try .git-http-config
+	[ -n "$SCOPE" ] && [ -f '.git-http-config' ] && OUT="$(git config -f '.git-http-config' --get git-http.$SCOPE.$1)"
 	if [ $? -eq 0 ];
 	then
 		echo $OUT
 		return 0
 	fi
-	[ -f '.git-ftp-config' ] && OUT="$(git config -f '.git-ftp-config' --get git-ftp.$1)"
+	[ -f '.git-http-config' ] && OUT="$(git config -f '.git-http-config' --get git-http.$1)"
 	if [ $? -eq 0 ];
 	then
 		echo $OUT
 		return 0
 	fi
-	[ -n "$SCOPE" ] && OUT="$(git config --get git-ftp.$SCOPE.$1)"
+	[ -n "$SCOPE" ] && OUT="$(git config --get git-http.$SCOPE.$1)"
 	if [ $? -eq 0 ];
 	then
 		echo $OUT
 		return 0
 	fi
-	OUT="$(git config --get git-ftp.$1)"
+	OUT="$(git config --get git-http.$1)"
 	if [ $? -eq 0 ];
 	then
 		echo $OUT
@@ -285,7 +282,7 @@ get_config() {
 	echo $OUT
 }
 
-readonly DEPLOYED_SHA1_FILE="$(get_config deployedsha1file .git-ftp.log)"
+readonly DEPLOYED_SHA1_FILE="$(get_config deployedsha1file .git-http.log)"
 
 # Simple log func
 write_log() {
@@ -505,21 +502,21 @@ set_deployed_sha1() {
 set_changed_files() {
 	# Get raw list of files
 	if [ $IGNORE_DEPLOYED -ne 0 ]; then
-		git ls-files -t $SYNCROOT > '.git-ftp-tmp'
+		git ls-files -t $SYNCROOT > '.git-http-tmp'
 	else
-		git diff --name-status --no-renames $DEPLOYED_SHA1 $SYNCROOT 2>/dev/null > '.git-ftp-tmp'
+		git diff --name-status --no-renames $DEPLOYED_SHA1 $SYNCROOT 2>/dev/null > '.git-http-tmp'
 	fi
 
 	# Filter against ignore file
-	if [ -f '.git-ftp-ignore' ]; then
-		grep -v '^#.*$\|^\s*$' '.git-ftp-ignore' | tr -d '\r' > '.git-ftp-ignore-tmp'
-		FILES_CHANGED=$(grep --invert-match -f '.git-ftp-ignore-tmp' '.git-ftp-tmp' | tr '\t' ' ')
+	if [ -f '.git-http-ignore' ]; then
+		grep -v '^#.*$\|^\s*$' '.git-http-ignore' | tr -d '\r' > '.git-http-ignore-tmp'
+		FILES_CHANGED=$(grep --invert-match -f '.git-http-ignore-tmp' '.git-http-tmp' | tr '\t' ' ')
 	else
-		FILES_CHANGED=$(cat '.git-ftp-tmp' | tr '\t' ' ')
+		FILES_CHANGED=$(cat '.git-http-tmp' | tr '\t' ' ')
 	fi
 
-	rm -f '.git-ftp-tmp'
-	rm -f '.git-ftp-ignore-tmp'
+	rm -f '.git-http-tmp'
+	rm -f '.git-http-ignore-tmp'
 
 	if [ $IGNORE_DEPLOYED -ne 0 ]; then
 		write_log "Sync all files."
@@ -745,14 +742,14 @@ set_scope() {
 
 	# URI without credentials
 	if ! echo "$URL" | grep -q '@'; then
-		$(git config git-ftp.$SCOPE.url $URL)
+		$(git config git-http.$SCOPE.url $URL)
 		return
 	fi
 
 	# set url
 	local protocol=$(get_protocol_of_url "$URL")
 	local path=${URL##*@}
-	$(git config git-ftp.$SCOPE.url ${protocol}${path})
+	$(git config git-http.$SCOPE.url ${protocol}${path})
 
 	# strip protocol
 	local credentials=${URL#${protocol}}
@@ -765,12 +762,12 @@ set_scope() {
 	case ${#colons} in
 		0)
 			# assume only username
-			$(git config git-ftp.$SCOPE.user ${credentials})
+			$(git config git-http.$SCOPE.user ${credentials})
 			;;
 		1)
 			# credentials have both username and password
-			$(git config git-ftp.$SCOPE.user ${credentials%:*})
-			$(git config git-ftp.$SCOPE.password ${credentials#*:})
+			$(git config git-http.$SCOPE.user ${credentials%:*})
+			$(git config git-http.$SCOPE.password ${credentials#*:})
 			;;
 		*)
 			# we can't know where to cut with multiple ':'
@@ -782,7 +779,7 @@ set_scope() {
 remove_scope() {
 	[ -z $SCOPE ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
 
-	$(git config --remove-section git-ftp.$SCOPE &>/dev/null)
+	$(git config --remove-section git-http.$SCOPE &>/dev/null)
 
 	[ $? -ne 0 ] && print_error_and_die "Cannot fine scope $SCOPE." $ERROR_GIT
 	print_info "Successfully removed scope $SCOPE."
@@ -1064,7 +1061,7 @@ do
 			write_log "Forced mode enabled."
 			;;
 		--version|version)
-			echo "git-ftp version $VERSION"
+			echo "git-http version $VERSION"
 			exit 0
 			;;
 		--insecure)

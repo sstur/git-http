@@ -1,26 +1,26 @@
-% GIT-FTP(1) git-ftp User Manual
+% GIT-HTTP(1) git-http User Manual
 % Rene Moser <mail@renemoser.net>
 % 2012-08-06
 
 # NAME
 
-Git-ftp - Git powered FTP client written as shell script. 
+Git-http - Git powered FTP client written as shell script.
 
 # SYNOPSIS
 
-git-ftp [actions] [options] [url]...
+git-http [actions] [options] [url]...
 
 # DESCRIPTION
 
-This manual page documents briefly the git-ftp program.
+This manual page documents briefly the git-http program.
 
-Git-ftp is a FTP client using Git to determine which local files to upload or which files should be deleted on the remote host. 
+Git-http is a FTP client using Git to determine which local files to upload or which files should be deleted on the remote host.
 
-It saves the deployed state by uploading the SHA1 hash in the .git-ftp.log file. There is no need for [Git] to be installed on the remote host.
+It saves the deployed state by uploading the SHA1 hash in the .git-http.log file. There is no need for [Git] to be installed on the remote host.
 
-Even if you play with different branches, git-ftp knows which files are different and only handles those files. No ordinary FTP client can do this and it saves time and bandwith.
+Even if you play with different branches, git-http knows which files are different and only handles those files. No ordinary FTP client can do this and it saves time and bandwith.
 
-Another advantage is Git-ftp only handles files which are tracked with [Git]. 
+Another advantage is Git-http only handles files which are tracked with [Git].
 
 # ACTIONS
 
@@ -31,7 +31,7 @@ Another advantage is Git-ftp only handles files which are tracked with [Git].
 :	Uploads files which have changed since last upload.
 
 `catchup` 
-:	Uploads the .git-ftp.log file only. We have already uploaded the files to remote host with a different program and want to remember its state by uploading the .git-ftp.log file.
+:	Uploads the .git-http.log file only. We have already uploaded the files to remote host with a different program and want to remember its state by uploading the .git-http.log file.
 
 `show`
 :	Downloads last uploaded SHA1 from log and hooks \`git show\`.
@@ -69,7 +69,7 @@ Another advantage is Git-ftp only handles files which are tracked with [Git].
 :	Enable remote locking.
 
 `-D`, `--dry-run`
-:	Does not upload or delete anything, but tries to get the .git-ftp.log file from remote host.
+:	Does not upload or delete anything, but tries to get the .git-http.log file from remote host.
 
 `-f`, `--force`
 :	Does not ask any questions, it just does.
@@ -124,16 +124,16 @@ But, there is not just FTP. Supported protocols are:
 
 # DEFAULTS
 
-Don't repeat yourself. Setting defaults for git-ftp in .git/config
+Don't repeat yourself. Setting defaults for git-http in .git/config
 	
-	$ git config git-ftp.<(url|user|password|syncroot|cacert)> <value>
+	$ git config git-http.<(url|user|password|syncroot|cacert)> <value>
 
 Everyone likes examples
 
-	$ git config git-ftp.user john
-	$ git config git-ftp.url ftp.example.com
-	$ git config git-ftp.password secr3t
-	$ git config git-ftp.syncroot path/dir
+	$ git config git-http.user john
+	$ git config git-http.url ftp.example.com
+	$ git config git-http.password secr3t
+	$ git config git-http.syncroot path/dir
 
 After setting those defaults, push to *john@ftp.example.com* is as simple as
 
@@ -145,27 +145,27 @@ Need different defaults per each system or environment? Use the so called scope 
 
 Useful if you use multi environment development. Like a development, testing and a production environment. 
 
-	$ git config git-ftp.<scope>.<(url|user|password|syncroot|cacert)> <value>
+	$ git config git-http.<scope>.<(url|user|password|syncroot|cacert)> <value>
 
 So in the case below you would set a testing scope and a production scope.
 
 Here we set the params for the scope "testing"
 
-	$ git config git-ftp.testing.url ftp.testing.com:8080/foobar-path
-	$ git config git-ftp.testing.password simp3l
+	$ git config git-http.testing.url ftp.testing.com:8080/foobar-path
+	$ git config git-http.testing.password simp3l
 
 Here we set the params for the scope "production"
 
-	$ git config git-ftp.production.user manager
-	$ git config git-ftp.production.url live.example.com
-	$ git config git-ftp.production.password n0tThatSimp3l
+	$ git config git-http.production.user manager
+	$ git config git-http.production.url live.example.com
+	$ git config git-http.production.password n0tThatSimp3l
 
 Pushing to scope *testing* alias *john@ftp.testing.com:8080/foobar-path* using 
 password *simp3l*
 
 	$ git ftp push -s testing
 
-*Note:* The **SCOPE** feature can be mixed with the **DEFAULTS** feature. Because we didn't set the user for this scope, git-ftp uses *john* as user as set before in **DEFAULTS**.
+*Note:* The **SCOPE** feature can be mixed with the **DEFAULTS** feature. Because we didn't set the user for this scope, git-http uses *john* as user as set before in **DEFAULTS**.
 
 Pushing to scope *production* alias *manager@live.example.com* using 
 password *n0tThatSimp3l*
@@ -187,7 +187,7 @@ Deleting scopes is easy using the `remove-scope` action.
 
 # IGNORING FILES TO BE SYNCED
 
-Add file names to `.git-ftp-ignore` to be ignored.
+Add file names to `.git-http-ignore` to be ignored.
 
 Ignoring all in Directory `config`:
 
@@ -234,6 +234,6 @@ There are a bunch of different error codes and their corresponding error message
 
 # KNOWN ISSUES & BUGS
 
-The upstream BTS can be found at <http://github.com/resmo/git-ftp/issues>.
+The upstream BTS can be found at <http://github.com/sstur/git-http/issues>.
 
 [Git]: http://git-scm.org
