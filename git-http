@@ -23,7 +23,7 @@
 readonly DEFAULT_PROTOCOL="http"
 readonly REMOTE_LCK_FILE="$(basename "$0").lck"
 readonly SYSTEM="$(uname)"
-readonly VERSION='0.1.0-snapshot'
+readonly VERSION='0.1.0'
 
 # ------------------------------------------------------------
 # Defaults
