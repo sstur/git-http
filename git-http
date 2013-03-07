@@ -20,7 +20,7 @@
 # ------------------------------------------------------------
 
 # General config
-readonly DEFAULT_PROTOCOL="ftp"
+readonly DEFAULT_PROTOCOL="http"
 readonly REMOTE_LCK_FILE="$(basename "$0").lck"
 readonly SYSTEM="$(uname)"
 readonly VERSION='0.1.0-snapshot'
@@ -54,7 +54,6 @@ declare -i IGNORE_DEPLOYED=0
 declare -i DRY_RUN=0
 declare -i FORCE=0
 declare -i ENABLE_REMOTE_LCK=0
-declare -i ACTIVE_MODE=0
 declare -i USE_KEYCHAIN=0
 declare -i ARG_MAX=4096
 declare -a GIT_SUBMODULES
@@ -83,7 +82,7 @@ USAGE
 
 
 DESCRIPTION
-	git-http does FTP the Git way.
+	git-http does website deployment the Git way.
 
 	It uses Git to determine which local files have changed since the last
 	deployment to the remote server and saves you time and bandwidth by
@@ -108,7 +107,7 @@ ACTIONS
 	. catchup
 		Uploads current SHA1 to log, does not upload any files.
 
-		This is useful if you used another FTP client to upload the
+		This is useful if you used another client to upload the
 		files and now want to remember the SHA1.
 
 	. add-scope
@@ -122,23 +121,19 @@ ACTIONS
 
 
 URL
-	. FTP (default)		host.example.com[:<port>][/<remote path>]
-	. FTP			ftp://host.example.com[:<port>][/<remote path>]
-	. SFTP			sftp://host.example.com[:<port>][/<remote path>]
-	. FTPS			ftps://host.example.com[:<port>][/<remote path>]
-	. FTPES			ftpes://host.example.com[:<port>][/<remote path>]
+	. HTTP			http://host.example.com[:<port>][/<remote path>]
+	. HTTPS			https://host.example.com[:<port>][/<remote path>]
 
 
 OPTIONS
 	-h, --help		Shows this help screen.
-	-u, --user		FTP login name.
-	-p, --passwd		FTP password.
-	-k, --keychain		FTP password from KeyChain (Mac OS X only).
+	-u, --user		username.
+	-p, --passwd		password.
+	-k, --keychain		password from KeyChain (Mac OS X only).
 	-s, --scope		Using a scope (e.g. dev, production, testing).
 	-D, --dry-run		Dry run: Does not upload anything.
 	-a, --all		Uploads all files, ignores deployed SHA1 hash.
 	-c, --commit		Sets SHA1 hash of last deployed commit by option.
-	-A, --active		Use FTP active mode.
 	-l, --lock		Enable/Disable remote locking.
 	-f, --force		Force, does not ask questions.
 	-n, --silent		Silent mode.
@@ -151,16 +146,16 @@ OPTIONS
 
 
 EXAMPLES
-	. git-http push -u john ftp://ftp.example.com:4445/public_ftp -p -v
-	. git-http push -p -u john -v ftp.example.com:4445:/public_ftp
-	. git-http add-scope production ftp://user:secr3t@ftp.example.com:4445/public_ftp
+	. git-http push -u john http://www.example.com:4445/ -p -v
+	. git-http push -p -u john -v www.example.com:4445:/
+	. git-http add-scope production http://user:secr3t@www.example.com:4445/
 	. git-http push --scope production
 	. git-http remove-scope production
 
 
 SET DEFAULTS
 	. git config git-http.user john
-	. git config git-http.url ftp.example.com
+	. git config git-http.url www.example.com
 	. git config git-http.password secr3t
 	. git config git-http.syncroot path/dir
 	. git config git-http.cacert path/cacert
@@ -170,7 +165,7 @@ SET DEFAULTS
 
 SET SCOPE DEFAULTS 
 	e.g. your scope is 'testing'
-	. git config git-http.testing.url ftp.example.local
+	. git config git-http.testing.url www.example.local
 
 
 VERSION
@@ -346,9 +341,6 @@ set_default_curl_options() {
 		CURL_ARGS+=(--netrc)
 	fi
 	CURL_ARGS+=(-#)
-	if [ $ACTIVE_MODE -eq 1 ]; then
-		CURL_ARGS+=(-P "-")
-	fi
 }
 
 upload_file() {
@@ -363,7 +355,7 @@ upload_file() {
 	fi
 	set_default_curl_options
 	CURL_ARGS+=(-T "$SRC_FILE")
-	CURL_ARGS+=(--ftp-create-dirs)
+	#CURL_ARGS+=(--ftp-create-dirs)
 	CURL_ARGS+=("$REMOTE_PROTOCOL://$REMOTE_HOST/${REMOTE_PATH}${DEST_FILE}")
 	curl "${CURL_ARGS[@]}"
 	check_exit_status "Could not upload file: '${REMOTE_PATH}$DEST_FILE'." $ERROR_UPLOAD
@@ -390,7 +382,7 @@ fire_upload_buffer() {
 	fi
 	print_info "Uploading ..."
 	set_default_curl_options
-	CURL_ARGS+=(--ftp-create-dirs)
+	#CURL_ARGS+=(--ftp-create-dirs)
 	CURL_ARGS+=("${CURL_UPLOADS[@]}")
 	curl "${CURL_ARGS[@]}"
 	check_exit_status "Could not upload files." $ERROR_UPLOAD
@@ -497,7 +489,7 @@ set_deployed_sha1() {
 	# Get the last commit (SHA) we deployed if not ignored or not found
 	write_log "Retrieving last commit from $REMOTE_PROTOCOL://$REMOTE_HOST/$REMOTE_PATH."
 	DEPLOYED_SHA1="$(get_file_content $DEPLOYED_SHA1_FILE)"
-	check_exit_status "Could not get last commit. Network down? Wrong URL? Use 'git ftp init' for the inital push." $ERROR_DOWNLOAD
+	check_exit_status "Could not get last commit. Network down? Wrong URL? Use 'git http init' for the inital push." $ERROR_DOWNLOAD
 	write_log "Last deployed SHA1 for $REMOTE_HOST/$REMOTE_PATH is $DEPLOYED_SHA1."
 }
 
@@ -735,7 +727,7 @@ set_curl_insecure() {
 	[ -z $CURL_INSECURE ] && CURL_INSECURE="$(get_config insecure)"
 }
 get_protocol_of_url() {
-	echo "$1" | tr '[:upper:]' '[:lower:]' | egrep '^(ftp|sftp|ftps|ftpes)://' | cut -d ':' -f 1
+	echo "$1" | tr '[:upper:]' '[:lower:]' | egrep '^(http|https)://' | cut -d ':' -f 1
 }
 
 set_scope() {
@@ -849,7 +841,7 @@ check_deployed_sha1() {
 	write_log "Check if $REMOTE_PROTOCOL://$REMOTE_HOST/$REMOTE_PATH is clean."
 	DEPLOYED_SHA1="$(get_file_content $DEPLOYED_SHA1_FILE)"
 	if [ "$DEPLOYED_SHA1" != "" ]; then
-		print_error_and_die "Commit found, use 'git ftp push' to sync. Exiting..." $ERROR_USAGE
+		print_error_and_die "Commit found, use 'git http push' to sync. Exiting..." $ERROR_USAGE
 	fi
 	# Make sure if sync all files if no sha1 was found
 	IGNORE_DEPLOYED=1
@@ -1087,10 +1079,6 @@ do
 					fi
 					;;
 			esac
-			;;
-		-A|--active)
-			ACTIVE_MODE=1
-			write_log "Using active mode."
 			;;
 		*)
 			# Pass thru anything that may be meant for fetch.
